@@ -71,7 +71,7 @@ class ActiveStorage::Service::BackblazeService < ActiveStorage::Service
     end
   end
 
-  def url(key, expires_in:, disposition:, filename:, **options)
+  def url(key, **options)
     instrument :url, {key: key} do |payload|
       url = @connection.get_public_object_url(@bucket_name, key)
       payload[:url] = url
@@ -80,7 +80,7 @@ class ActiveStorage::Service::BackblazeService < ActiveStorage::Service
     end
   end
 
-  def url_for_direct_upload(key, expires_in:, content_type:, content_length:, checksum:)
+  def url_for_direct_upload(key, expires_in:, content_type:, content_length:, checksum:, custom_metadata: {})
     instrument :url, { key: key} do |payload|
       result = @connection.b2_get_upload_url(@bucket_name)
       url = result["uploadUrl"]
@@ -89,7 +89,7 @@ class ActiveStorage::Service::BackblazeService < ActiveStorage::Service
     end
   end
 
-  def headers_for_direct_upload(key, content_type:, checksum:, content_length:, **options)
+  def headers_for_direct_upload(key, filename:, content_type:, content_length:, checksum:, custom_metadata: {}, **options)
     result = @connection.b2_get_upload_url(@bucket_name)
     { 'Authorization' => result["authorizationToken"], 'X-Bz-File-Name' => key, 'Content-Type' => content_type, 'Content-Length' => content_length, 'X-Bz-Content-Sha1' => 'do_not_verify' }
   end
